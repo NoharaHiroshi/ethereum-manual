@@ -13,13 +13,13 @@
   
 3）**大都会（Metropolis，2017年10月）**：这个阶段分两次上线，分别是：  
 
-* <strong>拜占庭（Byzantium，2017年10月）</strong> 加人了 EVM 指令，方变开发者编写智能合约。  
+* <strong>拜占庭（Byzantium，2017年10月）</strong> 加人了 EVM 指令，方便开发者编写智能合约。  
     
-* <strong>君士坦丁堡（Constantinople，2019年1月）</strong> 引入 PoW 和 PoS 的混合链模式，完成 PoW 向 PoS 的顺滑过渡。
+* <strong>君士坦丁堡（Constantinople，2019年1月）</strong> 引入 PoW 和 PoS 的混合模式，完成 PoW 向 PoS 的顺滑过渡。
   
 4）**宁静（Serenity，时间待定）**：改用PoS共识，使用Casper共识算法。提高以太坊的交易速度、降低交易费用。
  
-**目前阶段：大都会**
+**目前阶段：大都会（君士坦丁堡）**
 
 <br/>
 
@@ -34,3 +34,8 @@
 * 拜占庭是拜占庭（Byzantium，2017年10月）**5ETH -> 3ETH**
     
 * 君士坦丁堡（Constantinople，2019年1月）**3ETH -> 2ETH**
+
+
+### 3、EIP是什么，有哪些重要的EIP？ ###
+
+Ethereum Imporvement Proposals(以太坊改进建议)，简称EIP
