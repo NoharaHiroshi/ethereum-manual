@@ -35,7 +35,26 @@
     
 * 君士坦丁堡（Constantinople，2019年1月）**3ETH -> 2ETH**
 
+<br/>
 
-### 3、EIP是什么，有哪些重要的EIP？ ###
+### 3、EIP是什么？ERC又是什么？有什么联系 ###
 
-Ethereum Imporvement Proposals(以太坊改进建议)，简称EIP
+Ethereum Imporvement Proposals(以太坊改进建议)，简称EIP。是以太坊开发者社区提出的修改建议。
+
+Ethereum Request For Comment (以太坊意见征求稿)，简称ERC，是以太坊上各种应用的开发标准和协议。
+
+联系上讲，先有EIP，后有ERC。
+
+开发者们先提出符合EIP要求的改进建议，经过不断讨论，细节与结论会放在ERC（Draft）中，最终被委员会批准，行成了ERC（Final）。
+
+<br/>
+
+
+### 4、ERC20是什么？ ###
+
+ERC20协议是基础数字货币协议，用于自建数字货币进行交易。
+
+目前已**定稿（Final）**
+
+符合ERC20协议的智能合约，在创建时，会设置name、symbol、totalSupply、decimals属性来约定数字货币的名称、符号、发行量、最小可分割单位；创建balanceOf来记录每个以太坊地址持有数字货币的情况；提供transfer、transferFrom、approve、allowance方法来进行交易、委托交易。
+
