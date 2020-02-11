@@ -56,5 +56,14 @@ ERC20协议是基础数字货币协议，用于自建数字货币进行交易。
 
 目前已**定稿（Final）**
 
-符合ERC20协议的智能合约，在创建时，会设置name、symbol、totalSupply、decimals属性来约定数字货币的名称、符号、发行量、最小可分割单位；创建balanceOf来记录每个以太坊地址持有数字货币的情况；提供transfer、transferFrom、approve、allowance方法来进行交易、委托交易。
+符合ERC20协议的智能合约：
+
+* 在创建时，会设置name、symbol、totalSupply、decimals属性来约定数字货币的名称、符号、发行量、最小可分割单位。
+
+* 创建balanceOf来记录每个以太坊地址持有数字货币的情况。
+
+* 提供transfer、transferFrom、approve、allowance方法来进行交易、委托交易。
+
+* 直接兼容以太坊钱包。
+
 
