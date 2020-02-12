@@ -54,7 +54,7 @@ Ethereum Request For Comment (以太坊意见征求稿)，简称ERC，是以太�
 
 ERC20协议是基础数字货币协议，用于自建数字货币进行交易。
 
-目前已**定稿（Final）**
+状态：**定稿（Final）**
 
 符合ERC20协议的智能合约：
 
@@ -65,5 +65,26 @@ ERC20协议是基础数字货币协议，用于自建数字货币进行交易。
 * 提供transfer、transferFrom、approve、allowance方法来进行交易、委托交易。
 
 * 直接兼容以太坊钱包。
+
+<br/>
+
+### 5、ERC233是什么？ ###
+
+ERC223是ERC20的补充协议，防止ERC20 Token在交易过程中丢失。
+
+状态：**草稿（Draft）**
+
+ERC20的转账没有考虑到 <strong>“Token转到ERC20合约地址”</strong>这种情况的，一旦转给合约账户，这部分Token就无法被取出，也就相当于永远消失了。
+
+ERC223在ERC20的基础上，新增判断接收方是否为智能合约：
+
+* 接收方是个人账户，则使用原逻辑进行正常转账。
+
+* 接收方是合约账户，则该合约需要实现tokenFallback来处理接收的Token，如果该合约没有实现tokenFallback方法，则Token不会进行转移。
+
+**缺点**： 无法和现有ERC20 Token兼容，意味着原有的Token想从ERC20过渡到ERC223，需要重新部署。
+
+<br/>
+
 
 
