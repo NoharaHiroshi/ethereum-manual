@@ -149,6 +149,38 @@ ERC1400标准声明了canSend函数来实现转账限制，并利用canSend返�
 
 <br/>
 
+### 6、ERC1820是什么？ ###
+
+ERC1820标准定义了一个通用接口注册表合约。
+
+状态：**定稿（Final）**
+
+合约账户和个人账户都可以在上面注册其实现的功能（个人账户通过代理合约实现）。
+
+ERC1820是一个全局合约，即使部署在不同的以太坊链上，它的地址总是**0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24**
+
+ERC1820主要提供了2个接口：
+
+    // @param _addr 合约地址或者个人地址
+    // @param _interfaceHash 接口名称的keccak256
+    // @param _implementer 实现合约
+    setInterfaceImplementer(address _addr, bytes32 _interfaceHash, address _implementer) 
+    
+用来设置个人地址或合约地址（_addr）的接口（_interfaceHash）由哪个合约实现（_implementer）。
+
+    // @param _addr 合约地址或者个人地址
+    // @param _interfaceHash 接口名称的keccak256
+    // @param _implementer 实现合约
+    getInterfaceImplementer(address _addr, bytes32 _interfaceHash) external view returns (address)
+
+用来查询地址（_addr）的接口（_interfaceHash）由哪个合约实现（_implementer）。
+
+存储结构：
+
+    // 合约地址或者个人地址 => 接口名称的keccak256 => 实现合约
+    mapping(address => mapping(bytes32 => address)) interfaces;
+
+<br/>
 
 ## 二、合约设计相关
 
