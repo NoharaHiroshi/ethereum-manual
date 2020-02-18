@@ -117,15 +117,27 @@ ERC777协议对ERC20协议提出了诸多改进，可以视为ERC20的升级版�
 
 ERC777试图对广泛使用的ERC20标准进行升级。包括：
 
-* 支持默认操作员，默认操作员默认代表所有持有者转移Token。这些操作员通常为交易所合约，或者自动扣费合约，持有者可以随时授权给操作员或撤销对操作员的授权。
+* 支持默认操作员，默认可以代表所有持有者转移Token。这些操作员通常为交易所合约，或者自动扣费合约，持有者可以随时授权给操作员或撤销对操作员的授权。
 
 * 采用与ETH同种逻辑转移Token，即使用send(dest, value, data)。
 
-* 合约地址和个人地址都可以通过注册一个tokensToSend或tokensReceived函数来控制或拒绝发送或接收的Token，避免ERC20中存在的Token无法取出的问题。
+* 合约地址和个人地址都可以在ERC1820中注册一个包含tokensToSend或tokensReceived函数的合约来处理ERC777 Token交易通知，避免ERC20中存在的Token无法取出的问题。
 
 * 交易新增data和operatorData字段，用来记录交易详情，类似于银行转账的备注。
 
 * 可以向后兼容ERC20协议。
+
+另外，需要注意：
+
+* ERC777合约必须要通过ERC1820注册ERC777Token接口，以说明当前合约符合ERC777标准。如果ERC777要实现ERC20标准，还必须通过ERC1820注册ERC20Token接口
+
+> 注册方法是： 调用 ERC1820 注册合约的 setInterfaceImplementer 方法，参数 _addr 及 _implementer 均是合约的地址，_interfaceHash 是 ERC777Token 的 keccak256 哈希值（0xac7fbab5...177054）
+
+* granularity() 用来定义Token最小可切分单位（>=1），必须在创建时设定，之后不可以更改，不管是在铸币、发送还是销毁操作的Token数量，必需是粒度的整数倍。
+
+* tokensToSend 钩子函数，必须在修改余额状态之前调用。
+
+* tokensReceived 钩子函数，必须在修改余额状态之后调用。
 
 <br/>
 
