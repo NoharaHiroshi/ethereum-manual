@@ -134,7 +134,22 @@ ERC1400标准声明了canSend函数来实现转账限制，并利用canSend返�
 
 <br/>
 
-### 1、如何同时维护授权/撤销操作员记录，避免数据不一致？
+### 1、如何判断address是个人地址还是合约地址？
+
+    // 判断是否是个人地址
+    function isRegularAddress(address _addr) internal view returns(bool) {
+        require(_addr == address(0), "_addr is not allowed to be zero");
+        uint size;
+        // 内联汇编，通过获取地址的执行代码长度来判断是个人地址还是合约地址
+        assembly { 
+            size := extcodesize(_addr) 
+        }
+        return size == 0;
+    }
+
+<br/>
+
+### 2、如何同时维护授权/撤销操作员记录，避免数据不一致？
 
 补充：来源于ERC777中，合约需要同时记录持有人授权及撤销授权的操作员。并规定，在授权操作员记录中为True时，在撤销授权操作员记录中必须为False。
 
