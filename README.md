@@ -130,6 +130,35 @@ ERC1400标准声明了canSend函数来实现转账限制，并利用canSend返�
 <br/>
 
 
+## 二、合约设计相关
 
+<br/>
+
+### 1、如何同时维护授权/撤销操作员记录，避免数据不一致？
+
+补充：来源于ERC777中，合约需要同时记录持有人授权及撤销授权的操作员。并规定，在授权操作员记录中为True时，在撤销授权操作员记录中必须为False。
+
+    contract A {
+        // 默认操作员列表
+        address[] internal defaultOperators;
+        // 是否是默认操作员
+        mapping(address => bool) internal isDefaultOperator;
+        // 持有人授权的默认操作员
+        mapping(address => mapping(address => bool)) internal authorizedOperators;
+        // 持有人撤销的默认操作员
+        mapping(address => mapping(address => bool)) internal revokedDefaultOperator;
+        
+        function authorizeOperator(address _operator) external {
+            // 同时处理授权/撤销权限列表
+            if (isDefaultOperator[_operator]) {
+                revokedDefaultOperator[_operator][msg.sender] = false;
+            } else {
+                authorizedOperators[_operator][msg.sender] = true;
+            }
+            emit AuthorizedOperator(_operator, msg.sender);
+        }
+        
+        event AuthorizedOperator(address indexed operator, address indexed tokenHolder);
+    }
 
 
