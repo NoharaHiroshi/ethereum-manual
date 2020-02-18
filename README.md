@@ -170,10 +170,10 @@ ERC1820主要提供了2个接口：
 
     // @param _addr 合约地址或者个人地址
     // @param _interfaceHash 接口名称的keccak256
-    // @param _implementer 实现合约
+    // @return 实现合约
     getInterfaceImplementer(address _addr, bytes32 _interfaceHash) external view returns (address)
 
-用来查询地址（_addr）的接口（_interfaceHash）由哪个合约实现（_implementer）。
+用来查询个人地址或合约地址（_addr）的接口（_interfaceHash）由哪个合约实现（_implementer）。
 
 存储结构：
 
