@@ -206,11 +206,31 @@ ERC1820主要提供了2个接口：
 
 <br/>
 
-### 6、ERC165是什么？ ###
+### 7、ERC1404是什么？ ###
 
-状态：**定稿（Final）**
+ERC1404是简单限制数字货币标准。是ERC20的扩展，在ERC20的基础上，增加了转移限制功能。
 
-待完善。
+状态：**草稿（Draft）**
+
+ERC1404目的在于限制ERC20 Token交易，以符合证券法规。
+
+ERC1404在ERC20的基础上，新增了2个方法：
+
+    // @notic 检查交易是否受限
+    // @param from 发送方
+    // @param to 接收方
+    // @param value 转移token数量
+    // @return uint8 状态码 0：成功
+    function detectTransferRestriction (address from, address to, uint256 value) public view returns (uint8);
+
+用于检查交易是否受限。受限内容包括：Token接收方是否通过KYC认证，是否在白名单中；发送方的Token是否在锁定期内被冻结等等。detectTransferRestriction返回非0值，则交易应该被回退。
+
+    // @notic 查询交易受限原因
+    // @param restrictionCode 状态码
+    // @return string 交易受限原因
+    function messageForTransferRestriction (uint8 restrictionCode) public view returns (string); 
+    
+用于检查交易受限的原因。
 
 <br/>
 
