@@ -53,6 +53,14 @@ Ethereum Request For Comment (以太坊意见征求稿)，简称ERC，是以太�
 
 <br/>
 
+### 4、ENS是什么？ ###
+
+ENS（Ethereum Name Service）以太坊域名服务，类比DNS，是把域名解析为IP地址，而ENS是把.eth域名指向以太坊地址。
+
+ETH域名可以让以太坊地址更容易记忆，转账交易时不用输入对方以太坊地址0x.......，只需要输入以太坊域名就可以完成交易。
+
+<br/>
+
 ## 二、ERC协议相关
 
 <br/>
