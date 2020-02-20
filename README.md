@@ -258,7 +258,7 @@ ERC621建议totalSupply应当是可修改的。
 
 <br/>
 
-## 二、合约设计相关
+## 三、合约设计相关
 
 <br/>
 
@@ -305,3 +305,33 @@ ERC621建议totalSupply应当是可修改的。
     }
 
 
+## 四、以太坊漏洞相关
+
+<br/>
+
+### 1、整数溢出漏洞
+
+**类型**：合约漏洞。
+
+**原理**：以太坊虚拟机（EVM）整数类型有固定的大小，意味着一个整型变量它的大小是有界限的。比如uint8类型的整型，它的取值范围\[0, 255\]，如果用uint8整形变量存储256时，这个整型变量的值将变成0。
+
+    //BEC漏洞代码
+    function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {
+        uint cnt = _receivers.length;
+        uint256 amount = uint256(cnt) * _value;   // 漏洞点
+        require(cnt > 0 && cnt <= 20);
+        require(_value > 0 && balances[msg.sender] >= amount);
+
+        balances[msg.sender] = balances[msg.sender].sub(amount);
+        for (uint i = 0; i < cnt; i++) {
+            balances[_receivers[i]] = balances[_receivers[i]].add(_value);
+            Transfer(msg.sender, _receivers[i], _value);
+        }
+        return true;
+      }
+
+amount是由接受方数量与转账金额决定的，攻击者利用这两个值构建了一个超出uint256大小范围的值，例如2^256，此时amount值为0，绕过了balances\[msg.sender\] >= amount检查。最终，攻击者利用很小的代价为_receivers账户列表转入了大量的Token。
+
+**检查及修复**：整数溢出的类型包括**乘法溢出，加法溢出，减法溢出**三种，检查所有涉及账户资产变动的方法，由其需要注意实际转账金额，是否是由用户输入金额经过计算得到的。建议使用OpenZeppelin的SafeMath 来处理算术逻辑，防止整数溢出漏洞。
+
+<br/>
