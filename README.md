@@ -338,5 +338,58 @@ amount是由接受方数量与转账金额决定的，攻击者利用这两个�
 
 ### 2、The Dao漏洞
 
-**原理**：在用户调用智能合约中一个不存在的方法时，以太坊虚拟机（EVM）会将此次调用交给fallback方法处理。
+**类型**：合约漏洞。
 
+**原理**：**智能合约1**的**方法A**调用**智能合约2**中一个不存在的方法或者向**智能合约2**转账时，以太坊虚拟机（EVM）会将此次调用交给**智能合约2**中fallback方法处理。在fallback方法中再次调用**智能合约1**的**方法A**，就会形成递归，直至gas耗尽。
+
+    The Dao漏洞代码（部分）
+    // 智能合约1
+    contract 1 {
+        function splitDAO(uint _proposalID, address _newCurator) noEther onlyTokenholders returns (bool _success) {
+            uint fundsToBeMoved = (balances[msg.sender] * p.splitData[0].splitBalance) / p.splitData[0].totalSupply;
+            if (p.splitData[0].newDAO.createTokenProxy.value(fundsToBeMoved)(msg.sender) == false)
+                throw;
+            Transfer(msg.sender, 0, balances[msg.sender]);
+            withdrawRewardFor(msg.sender);  // 1
+            totalSupply -= balances[msg.sender]; 
+            balances[msg.sender] = 0; 
+            paidOut[msg.sender] = 0;
+            return true;
+        }
+
+        function withdrawRewardFor(address _account) noEther internal returns(bool _success) {
+            if ((balanceOf(_account) * rewardAccount.accumulatedInput()) / totalSupply < paidOut[_account])
+                throw;
+            uint reward = (balanceOf(_account) * rewardAccount.accumulatedInput()) / totalSupply - paidOut[_account];
+            if (!rewardAccount.payOut(_account, reward)) // 2
+                throw;
+            paidOut[_account] += reward; 
+            return true;
+        }
+
+        function payOut(address _recipient, uint _amount) returns (bool) {
+            if (msg.sender != owner || msg.value > 0 || (payOwnerOnly && _recipient != owner))
+                throw;
+            if (_recipient.call.value(_amount)()) { // 3
+                PayOut(_recipient, _amount);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+    
+    // 智能合约2(_recipient)
+    contract 2 {
+        function () {
+          contract1.splitDAO(_proposalID, _newCurator); // 4
+        }
+    }
+
+如标识的1->2->3->4，当合约1执行splitDAO方法时，由splitDAO -> withdrawRewardFor -> payOut顺序调用，payOut中的\_recipient.call.value(\_amount)()触发合约2的fallback函数，fallback函数又调用了合约1的splitDAO方法，形成了递归。
+
+由于账户余额扣除与转账顺序有误（先进行转账，后进行余额扣除），攻击者在调用转账之后让方法进入了递归，导致扣除账户余额的操作被搁置。随着递归次数的增加，合约中的资产不断的被转移至攻击者的合约账户中。当满足递归结束条件，扣除了攻击者账户中的余额，方法执行结束。
+
+**检查及修复**：
+1. 采用正确的余额扣除和转账顺序（先进行余额扣除，再进行转账）。
+2. 尽可能使用send方法进行转账（限制为2300gas），减少使用低阶方法call.value进行转账（会使用尽量多的gas）。
