@@ -459,4 +459,56 @@ amount是由接受方数量与转账金额决定的，攻击者利用这两个�
 **检查及修复**：
 参照BTC与BCH的处理方法，BCH在签名时，在SIGHASH_TYPE上增加了一个FORK_ID位，并将自己的FORK_ID设置为0x40，BTC使用了区别于BCH的SIGHASH_TYPE，这样BCH交易的签名结果在BTC网络上验证不会通过，反之亦然，达到双向重放保护。
 
+<br/>
 
+### 4、call注入漏洞
+
+**类型**：合约漏洞。
+
+**原理**：call作为EVM的底层方法，可以对合约直接进行调用。
+    
+    // call两种调用方式
+    <address>.call(bytes);
+    <address>.call(函数选择器，参数1，参数2...);
+    
+* 攻击模式1：<address>.call(bytes)
+    
+当智能合约中提供了一个方法，可以自定义调用方，及传入参数，那么这个合约就有可能存在call注入漏洞。
+  
+     contract A {
+        function callCode(address \_addr, bytes \_data){
+            \_addr.call(\_data);        
+        }
+        
+        function transfer(address _to, uint256 _value){
+          ...
+        }
+     }
+     
+调用合约的callCode方法，\_addr为contractA合约本身地址，\_data为调用trnasfer方法将合约账户Token转移给攻击者地址的bytes。执行方法后，合约账户中的Token就会转移到攻击者账户中。
+
+* 攻击模式2：<address>.call(函数选择器，参数1，参数2...);
+  
+函数选择器为bytes4(keccak256("func(arg1,arg2)"))，如果合约中提供了一个方法，可以自定义调用方，函数选择器，参数，那么这个合约就有可能存在call注入漏洞。
+
+    contract A {
+        function callCode(address \_addr, string \_func, address \_to, uint256 \_value, bytes \_data){
+            \_addr.call(bytes4(keccak256(_func)), _to, _value, _data);        
+        }
+        
+        function transfer(address _to, uint256 _value){
+          ...
+        }
+     }
+
+用合约的callCode方法，\_addr为contractA合约本身地址，\_func为transfer(address,uint256)，\_to为攻击者账户地址，\_value为转移Token数量。执行方法后，call调用了当前合约的transfer方法，合约账户中的Token就会转移到攻击者账户中。
+
+另外，由于EVM的call调用是根据ABI来解析参数的，callCode方法中的call调用transfer方法的时候，虽然传入了3个参数(\_to,\_value,\_data)，但EVM根据ABI(transfer(address,uint256))解析参数，发现该方法只需要两个参数，就会停止解析后面的内容(\_data)，因此调用在编译和运行阶段都是正常的。
+
+**检查及修复**：
+
+1. 尽量避免使用call调用。
+2. 注意检查call调用是否可以自定义调用方，参数。
+3. 对调用方及调用方法进行限制。
+
+<br/>
