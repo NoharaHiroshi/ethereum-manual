@@ -466,18 +466,19 @@ amount是由接受方数量与转账金额决定的，攻击者利用这两个�
 **类型**：合约漏洞。
 
 **原理**：call作为EVM的底层方法，可以对合约直接进行调用。
+
+call两种调用方式:
     
-    // call两种调用方式
     <address>.call(bytes);
     <address>.call(函数选择器，参数1，参数2...);
     
-* 攻击模式1：<address>.call(bytes)
+**攻击模式1：\<address\>.call(bytes)**
     
 当智能合约中提供了一个方法，可以自定义调用方，及传入参数，那么这个合约就有可能存在call注入漏洞。
   
      contract A {
-        function callCode(address \_addr, bytes \_data){
-            \_addr.call(\_data);        
+        function callCode(address _addr, bytes _data){
+            _addr.call(_data);        
         }
         
         function transfer(address _to, uint256 _value){
@@ -487,13 +488,13 @@ amount是由接受方数量与转账金额决定的，攻击者利用这两个�
      
 调用合约的callCode方法，\_addr为contractA合约本身地址，\_data为调用trnasfer方法将合约账户Token转移给攻击者地址的bytes。执行方法后，合约账户中的Token就会转移到攻击者账户中。
 
-* 攻击模式2：<address>.call(函数选择器，参数1，参数2...);
+**攻击模式2：\<address\>.call(函数选择器，参数1，参数2...)**
   
 函数选择器为bytes4(keccak256("func(arg1,arg2)"))，如果合约中提供了一个方法，可以自定义调用方，函数选择器，参数，那么这个合约就有可能存在call注入漏洞。
 
     contract A {
-        function callCode(address \_addr, string \_func, address \_to, uint256 \_value, bytes \_data){
-            \_addr.call(bytes4(keccak256(_func)), _to, _value, _data);        
+        function callCode(address _addr, string _func, address _to, uint256 _value, bytes _data){
+            _addr.call(bytes4(keccak256(_func)), _to, _value, _data);        
         }
         
         function transfer(address _to, uint256 _value){
