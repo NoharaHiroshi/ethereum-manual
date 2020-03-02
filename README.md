@@ -176,6 +176,38 @@ The Dao事件导致ETH的价值从20美元跌落至13美元，并导致ETH分裂
 
 4、根据BIP-39的字典，得到每一组值对应的单词，保持原有次序，就获得了私钥的助记词。
 
+随机数的位数与单词数量的关系
+
+![pic_1](https://github.com/NoharaHiroshi/ethereum-manual/blob/master/img/img_1.png)
+
+生成随机数并转化为助记词过程
+
+![pic_2](https://github.com/NoharaHiroshi/ethereum-manual/blob/master/img/img_2.png)
+
+<br/>
+
+### 12、种子秘钥是什么？ ###
+
+助记词代表的128bit/256bit随机数，通过秘钥扩展算法（如PBKDF2），扩展为512bit长的数，这个数就是种子秘钥。
+
+扩展算法需要2个参数：助记词和盐。
+
+加盐的目的是在随机数的基础上，设置密码多一层保护。
+
+生成过程：
+
+1、PBKDF2秘钥扩展算法第一个参数是助记词。
+
+2、PBKDF2秘钥扩展算法的第二个参数是盐.用户可以选择不设置盐，盐默认值为"mnemonic"，用户也可以选择设置盐，盐值为"mnemonic" + "用户设置值"。
+
+3、PBKDF2秘钥扩展算法对助记词和盐进行2048轮哈希运算（HMAC-SHA512），产生一个512bit长的数。 这个数就是种子秘钥。
+
+从助记词到种子秘钥的生成过程
+
+![pic_3](https://github.com/NoharaHiroshi/ethereum-manual/blob/master/img/img_3.png)
+
+<br/>
+
 ## 二、ERC协议相关
 
 <br/>
