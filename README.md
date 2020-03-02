@@ -133,6 +133,49 @@ The Dao事件导致ETH的价值从20美元跌落至13美元，并导致ETH分裂
 
 <br/>
 
+### 10、非确定性钱包的构成？ ###
+
+非确定性钱包的私钥以JSON格式存储在keystore文件里。
+
+    {
+      "address": "001d3f1ef827552ae1114027bd3ecf1f086ba0f9",
+      "crypto": {
+        "cipher": "aes-128-ctr",
+        "ciphertext": "233a9f4d236ed0c13394b504b6da5df02587c8bf1ad8946f6f2b58f055507ece",
+        "cipherparams": {
+          "iv": "d10c6ec5bae81b6cb9144de81037fa15"
+        },
+      "kdf": "scrypt",
+      "kdfparams": {
+        "dklen": 32,
+        "n": 262144,
+        "p": 1,
+        "r": 8,
+        "salt":
+        "99d37a47c7c9429c66976f643f386a61b78b97f3246adca89abe4245d278840
+      },
+        "mac": "594c8df1c8ee0ded8255a50caf07e8c12061fd859f4b7c76ab704b17c957e842
+      },
+      "id": "4fcb2ba4-ccdb-424f-89d5-26cce304bf9c",
+      "version": 3
+    }
+
+<br/>
+
+### 11、助记词是什么？ ###
+
+助记词是BIP-39的实现，用一组有序单词表示十六进制私钥，方便用户记忆。
+
+生成过程：
+
+1、钱包生成一个128bit或256bit的随机数，记为S。
+
+2、用S的SHA-256哈希值的前几位（随机数位数/32）作为校验值，添加到随机数S的末尾，得到T。
+
+3、将T按11bit为单位进行分组。
+
+4、根据BIP-39的字典，得到每一组值对应的单词，保持原有次序，就获得了私钥的助记词。
+
 ## 二、ERC协议相关
 
 <br/>
