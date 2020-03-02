@@ -176,6 +176,16 @@ The Dao事件导致ETH的价值从20美元跌落至13美元，并导致ETH分裂
 
 4、根据BIP-39的字典，得到每一组值对应的单词，保持原有次序，就获得了私钥的助记词。
 
+随机数的位数与单词数量的关系
+
+![pic_1](https://github.com/NoharaHiroshi/ethereum-manual/blob/master/img/img_1.png)
+
+生成随机数并转化为助记词过程
+
+![pic_2](https://github.com/NoharaHiroshi/ethereum-manual/blob/master/img/img_2.png)
+
+<br/>
+
 ## 二、ERC协议相关
 
 <br/>
