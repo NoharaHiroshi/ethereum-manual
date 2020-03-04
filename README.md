@@ -336,6 +336,14 @@ m / purpose' / coin_type' / account' / change / address_index
 
 <br/>
 
+### 18、冷钱包与热钱包？ ###
+
+* 冷钱包：私钥隔离网络的钱包，也被叫做离线钱包。
+
+* 热钱包：私钥接触网络的钱包。
+
+<br/>
+
 ## 二、ERC协议相关
 
 <br/>
