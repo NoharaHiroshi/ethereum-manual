@@ -295,6 +295,12 @@ HD钱包全称为分层确定性（Hierarchical Deterministic）钱包，确定�
 
 ![pic_5](https://github.com/NoharaHiroshi/ethereum-manual/blob/master/img/img_5.png)
 
+**HD钱包的优势**
+
+1、 HD钱包的树形结构可以表示组织结构的含义，比如索引为0的节点用于公司财务，索引为1的节点用于基金。
+
+2、 子公钥可以不通过子私钥，直接由父公钥派生，因此可以用于相对不安全的服务器，或者用于收款。
+
 <br/>
 
 ### 14、什么是扩展秘钥？ ###
