@@ -459,7 +459,7 @@ V用来确定这2个公钥中的哪一个才是用户公钥。
 
 <br/>
 
-### 23、如何签名交易 ###
+### 23、如何对交易进行签名 ###
 
 交易签名算法
 
@@ -479,9 +479,9 @@ V用来确定这2个公钥中的哪一个才是用户公钥。
 
 <br/>
 
-### 24、如何检验签名 ###
+### 24、节点如何检验交易签名 ###
 
-校验签名过程：
+节点校验签名过程：
 
 1. 节点接收到交易，会先利用交易的签名部分（R、S、V）解析出发送方公钥，这个过程叫做公钥恢复。
 
@@ -493,7 +493,7 @@ V用来确定这2个公钥中的哪一个才是用户公钥。
 
 <br/>
 
-### 25、节点在收到合约交易后，会执行哪些检查？ ###
+### 25、节点在收到交易后，会执行哪些检查？ ###
 
 检验交易包括：
 
@@ -511,7 +511,7 @@ V用来确定这2个公钥中的哪一个才是用户公钥。
 
 <br/>
 
-### 26、节点执行合约交易的过程？ ###
+### 26、节点执行交易的过程？ ###
 
 执行交易过程：
 
@@ -532,6 +532,22 @@ V用来确定这2个公钥中的哪一个才是用户公钥。
 8. 增加发送者账户的nonce值，每当发送一笔交易，账户的nonce就会增加，这个操作在交易之初就会完成（过程1），如果交易失败，nonce的值就会回滚。
 
 <br/>
+
+### 27、请描述交易从发起到被确认的整个流程？ ###
+
+交易的整个生命周期分为：
+
+**1. 用户发起交易**：用户发起一笔交易，客户端会根据用户输入封装SendTxArgs对象，SendTxArgs包括From、To、Nonce、Value、Data、Input、GasPrice、GasLimit参数；调用SendTxArgs.toTransaction()生成Transaction对象，Transaction中的txdata记录了该笔交易信息，包括AccountNonce、Price、GasLimit、Recipient、Amount、PayLoad、V、R、S、Hash。
+
+**2. 用户签名并提交交易**：客户端根据SendTxArgs对象中的From参数，查找对应的Wallet是否解锁，如果已解锁，就可以获取到用户的私钥，调用Wallet.SignTx()对交易进行签名，获得64bit签名，前32bit作为R、后32bit作为S、最后1bit作为V，对应填入到Transaction中txdata的R、S、V。签名完成后，调用submitTransaction()，提交交易。
+
+**3. 节点将交易放入交易池**：提交交易后，节点将交易送入交易池txpool中。txpool会判断交易是否已存在，并调用validateTx验证交易。txpool中有Pending、Queue的txList，会对新加入的交易进行判断，如果交易的nonce值已在Pending交易列表中，且gasPrice为原有交易的110%，则替换之前的交易。如果nonce值不在Pending列表中，则判断是否在Queue列表中，如果在，说明重复交易，如果不在，则加入到Queue列表中。待该笔交易可执行时，调用promoteExecuteables()方法将交易由Queue列表放入到Pending列表中，并执行promoteTx()方法，推送TxPreEvent事件。
+
+**4. 节点广播交易**：节点订阅并监听到TxPreEvent事件，调用grpc将该笔交易广播到其他节点。
+
+**5. 节点打包交易并挖矿**：节点部署的矿工Worker订阅并监听到了TxPreEvent事件，从txpool中获取交易进行打包。GasPrice越高的交易排序越靠前，节点调用EVM虚拟机执行交易，并返回给Work有关此次交易的Receipt（执行列表）。同时Worker调用CpuAgent进行挖矿，挖矿成功后，worker广播NewMinedBlockEvent事件。
+
+**6. 节点验证区块**：其余节点接收到区块，对区块结果进行验证，验证无误后，获取区块中的交易Receipt（执行列表），按照Receipt执行交易。所有的节点在持有同样的数据下，按照同样的顺序执行同样的交易，实现了区块数据的同步更新，交易被所有节点确认。
 
 ## 二、ERC协议相关
 
