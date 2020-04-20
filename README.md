@@ -549,6 +549,16 @@ V用来确定这2个公钥中的哪一个才是用户公钥。
 
 **6. 节点验证区块**：其余节点接收到区块，对区块结果进行验证，验证无误后，获取区块中的交易Receipt（执行列表），按照Receipt执行交易。所有的节点在持有同样的数据下，按照同样的顺序执行同样的交易，实现了区块数据的同步更新，交易被所有节点确认。
 
+<br/>
+
+### 28、合约地址由哪几个因素决定，是如何生成的？ ###
+
+合约的地址是由创建这个合约的外部账户地址，以及外部账户交易的nonce值经过keccak256计算得来的，与合约代码无关。
+
+address = keccak256(rlp.encode(account_address, nonce));
+
+<br/>
+
 ## 二、ERC协议相关
 
 <br/>
@@ -945,5 +955,107 @@ call两种调用方式:
 1. 尽量避免使用call调用。
 2. 注意检查call调用是否可以自定义调用方，参数。
 3. 对调用方及调用方法进行限制。
+
+<br/>
+
+### 5、this.balance漏洞
+
+**类型**：设计、合约漏洞。
+
+**原理**：一般向合约发送以太币，总会触发payable函数（包括callback函数），但某些情况，可以强制向合约发送以太币，而不触发合约的任何代码。这样就造成了利用this.balance设计合约逻辑的漏洞。
+
+强制转移以太币的两种方法：
+
+1. self-destruct方法
+
+合约可以通过制定selfdestruct方法来销毁合约，并将合约持有的以太币余额转出到指定外部账户/合约账户中。当转出的账户地址是合约地址时，会无视合约的代码，强制向合约发送以太币（不会触发合约的任何代码）。
+
+2. 预先向未创建的合约发送以太币
+
+合约的地址取决于创建合约的外部账户地址，以及外部账户交易的nonce值，与合约代码无关。
+
+    address = keccak256(rlp.encode(account_address, nonce));
+
+既然合约地址只与账户及账户的nonce值有关，并且二者都可以从区块链网络中得知，那么就可以预先推测出合约地址，并向合约地址发送以太币。由于当前账户合约并未创建，其合约代码为空，向账户发送以太币，自然不会触发任何代码。
+
+    contract ETHGame {
+        uint256 public payoutMileStone1 = 3 ether;
+        uint256 public mileStone1Reward = 2 ether;
+        uint256 public payoutMileStone2 = 5 ether;
+        uint256 public mileStone2Reward = 3 ether;
+        uint256 public finalMileStone = 10 ether;
+        uint256 public finalReward = 5 ether;
+        
+        mapping(address => uint256) redeemableEther;
+    
+        function play() payable {
+            require(msg.value == 0.5 ether);
+            uint256 currentBalance = this.balance + msg.value;
+            require(currentBalance <= finalMileStone);
+            if(currentBalance == payoutMileStone1) {
+               redeemableEther[msg.sender] += mileStone1Reward;
+            }
+            else if(currentBalance == payoutMileStone2) {
+               redeemableEther[msg.sender] += mileStone2Reward;
+            }
+            else if(currentBalance == finalMileStone) {
+               redeemableEther[msg.sender] += finalReward;
+            }
+            return;
+        } 
+        
+        function claimReward() public {
+          require(this.balance == finalMileStone);
+          require(redeemableEther[msg.sender] > 0);
+          msg.sender.transfer(redeemableEther[msg.sender]);
+          redeemableEther[msg.sender] = 0;
+        }
+    }
+    
+    
+攻击者可以利用上述方法，强制向合约转移0.1ETH，由于合约中规定，每次只能发送0.5ETH，因此，退出条件永远不会达到，所有参与人的以太币将都被锁在合约中。
+
+**检查及修复**：
+
+1. 注意合约中利用this.balance的逻辑。
+2. 使用状态变量代替this.balance。
+
+修复后的代码：
+
+       contract ETHGame {
+           uint256 public payoutMileStone1 = 3 ether;
+           uint256 public mileStone1Reward = 2 ether;
+           uint256 public payoutMileStone2 = 5 ether;
+           uint256 public mileStone2Reward = 3 ether;
+           uint256 public finalMileStone = 10 ether;
+           uint256 public finalReward = 5 ether;
+           uint256 public balance;
+
+           mapping(address => uint256) redeemableEther;
+
+           function play() payable {
+               require(msg.value == 0.5 ether);
+               uint256 currentBalance = balance + msg.value;
+               require(currentBalance <= finalMileStone);
+               if(currentBalance == payoutMileStone1) {
+                  redeemableEther[msg.sender] += mileStone1Reward;
+               }
+               else if(currentBalance == payoutMileStone2) {
+                  redeemableEther[msg.sender] += mileStone2Reward;
+               }
+               else if(currentBalance == finalMileStone) {
+                  redeemableEther[msg.sender] += finalReward;
+               }
+               return;
+           } 
+
+           function claimReward() public {
+             require(balance == finalMileStone);
+             require(redeemableEther[msg.sender] > 0);
+             msg.sender.transfer(redeemableEther[msg.sender]);
+             redeemableEther[msg.sender] = 0;
+           }
+       }
+
 
 <br/>
